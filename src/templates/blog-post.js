@@ -6,15 +6,15 @@ import Layout from "../components/layout"
 import SEO from "../components/seo"
 
 const BlogPostTemplate = ({ data, location }) => {
-  const post = data.markdownRemark
+  const node = data.microcmsBlog
   const siteTitle = data.site.siteMetadata?.title || `Title`
   const { previous, next } = data
 
   return (
     <Layout location={location} title={siteTitle}>
       <SEO
-        title={post.frontmatter.title}
-        description={post.frontmatter.description || post.excerpt}
+        title={node.title}
+        description={node.description}
       />
       <article
         className="blog-post"
@@ -22,11 +22,11 @@ const BlogPostTemplate = ({ data, location }) => {
         itemType="http://schema.org/Article"
       >
         <header>
-          <h1 itemProp="headline">{post.frontmatter.title}</h1>
-          <p>{post.frontmatter.date}</p>
+          <h1 itemProp="headline">{node.title}</h1>
+          <p>{node.publishedAt}</p>
         </header>
         <section
-          dangerouslySetInnerHTML={{ __html: post.html }}
+          dangerouslySetInnerHTML={{ __html: node.body }}
           itemProp="articleBody"
         />
         <hr />
@@ -46,15 +46,15 @@ const BlogPostTemplate = ({ data, location }) => {
         >
           <li>
             {previous && (
-              <Link to={previous.fields.slug} rel="prev">
-                ← {previous.frontmatter.title}
+              <Link to={`/${previous.blogId}`} rel="prev">
+                ← {previous.title}
               </Link>
             )}
           </li>
           <li>
             {next && (
-              <Link to={next.fields.slug} rel="next">
-                {next.frontmatter.title} →
+              <Link to={`/${next.blogId}`} rel="next">
+                {next.title} →
               </Link>
             )}
           </li>
@@ -77,31 +77,21 @@ export const pageQuery = graphql`
         title
       }
     }
-    markdownRemark(id: { eq: $id }) {
-      id
-      excerpt(pruneLength: 160)
-      html
-      frontmatter {
+    previous: microcmsBlog(id: { eq: $previousPostId }) {
+        blogId
         title
-        date(formatString: "MMMM DD, YYYY")
+    }
+    next: microcmsBlog(id: { eq: $nextPostId }) {
+        blogId
+        title
+    }
+    microcmsBlog(id: { eq: $id }) {
+        blogId
+        title
+        body
         description
+        publishedAt(formatString: "YYYY/MM/DD")
       }
-    }
-    previous: markdownRemark(id: { eq: $previousPostId }) {
-      fields {
-        slug
-      }
-      frontmatter {
-        title
-      }
-    }
-    next: markdownRemark(id: { eq: $nextPostId }) {
-      fields {
-        slug
-      }
-      frontmatter {
-        title
-      }
-    }
+  
   }
 `

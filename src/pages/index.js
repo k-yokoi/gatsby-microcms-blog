@@ -28,11 +28,11 @@ const BlogIndex = ({ data, location }) => {
       <SEO title="All posts" />
       <Bio />
       <ol style={{ listStyle: `none` }}>
-        {posts.map(post => {
-          const title = post.frontmatter.title || post.fields.slug
+        {data.allMicrocmsBlog.edges.map(({ node }) => {
+          const title = node.title
 
           return (
-            <li key={post.fields.slug}>
+            <li key={node.blogId}>
               <article
                 className="post-list-item"
                 itemScope
@@ -40,16 +40,16 @@ const BlogIndex = ({ data, location }) => {
               >
                 <header>
                   <h2>
-                    <Link to={post.fields.slug} itemProp="url">
+                    <Link to={node.blogId} itemProp="url">
                       <span itemProp="headline">{title}</span>
                     </Link>
                   </h2>
-                  <small>{post.frontmatter.date}</small>
+                  <small>{node.publishedAt}</small>
                 </header>
                 <section>
                   <p
                     dangerouslySetInnerHTML={{
-                      __html: post.frontmatter.description || post.excerpt,
+                      __html: node.description
                     }}
                     itemProp="description"
                   />
@@ -85,5 +85,16 @@ export const pageQuery = graphql`
         }
       }
     }
+    allMicrocmsBlog {
+      edges {
+        node {
+          blogId
+          title
+          description
+          publishedAt(formatString: "YYYY/MM/DD")
+        }
+      }
+    }
   }
 `
+
